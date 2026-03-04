@@ -121,7 +121,7 @@ public class Model extends Observable {
                     board.move(col, pre_row, cur_t);
                     flag = true;
                 } else if (pre_t.value() == cur_t.value()) {
-                    //score = score + cur_t.value() * 2;
+                    score = score + cur_t.value() * 2;
                     board.move(col, pre_row, cur_t);
                     flag = true;
                     pre_row--;
