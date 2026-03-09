@@ -13,6 +13,7 @@ public class ArrayDeque<T> {
         nextLast = 1;
     }
 
+    /*
     public void addFirst(T item){
         items[nextFirst] = item;
         size++;
@@ -25,8 +26,25 @@ public class ArrayDeque<T> {
     public void addLast(T item){
         items[nextLast] = item;
         size++;
-        resize(items.length * 2);
+        if(size == items.length){
+            resize(items.length * 2);
+        }
         nextLast = Math.floorMod(nextLast + 1, items.length);
+    }
+    */
+
+    public void addFirst(T item) {
+        if (size == items.length) { resize(items.length * 2); }
+        items[nextFirst] = item;
+        nextFirst = Math.floorMod(nextFirst - 1, items.length);
+        size++;
+    }
+
+    public void addLast(T item){
+        if (size == items.length) {resize(items.length * 2);}
+        items[nextLast] = item;
+        nextLast = Math.floorMod(nextLast + 1, items.length);
+        size++;
     }
 
     public boolean isEmpty(){
@@ -69,10 +87,11 @@ public class ArrayDeque<T> {
         if(index >= size){
             return null;
         } else{
-            return items[index + 1 + nextFirst];
+            return items[Math.floorMod(nextFirst + 1 + index, items.length)];
         }
     }
 
+    /*
     public void resize(int capacity){
         T[] newitems;
         newitems = (T[]) new Object[capacity];
@@ -81,9 +100,25 @@ public class ArrayDeque<T> {
         while(i != nextLast){
             newitems[j] = items[i];
             i = (i + 1) % items.length;
+            j++;
         }
         items = newitems;
         nextFirst = items.length - 1;
         nextLast = items.length / 2;
     }
+
+     */
+
+    public void resize(int capacity){
+        T[] newitems;
+        newitems = (T[]) new Object[capacity];
+        int i = (nextFirst + 1) % items.length;
+        for(int j = 0; j < size; j++){
+            newitems[j] = items[i];
+            i = (i + 1) % items.length;
+        }
+        items = newitems;
+        nextFirst = capacity - 1;
+        nextLast = size;
+ ;   }
 }
