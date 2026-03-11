@@ -36,7 +36,9 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
     */
 
     public void addFirst(T item) {
-        if (size == items.length) { resize(items.length * 2); }
+        if (size == items.length) {
+            resize(items.length * 2);
+        }
         items[nextFirst] = item;
         nextFirst = Math.floorMod(nextFirst - 1, items.length);
         size++;
@@ -69,6 +71,9 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
         items[firstIndex] = null;
         nextFirst = firstIndex;
         size--;
+        if (items.length >= 16 && size < items.length / 4) {
+            resize(items.length / 2);
+        }
         return target;
     }
 
@@ -79,6 +84,9 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
         items[lastIndex] = null;
         nextLast = lastIndex;
         size--;
+        if (items.length >= 16 && size < items.length / 4) {
+            resize(items.length / 2);
+        }
         return target;
     }
 
@@ -108,7 +116,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
 
      */
 
-    public void resize(int capacity){
+    private void resize(int capacity){
         T[] newitems;
         newitems = (T[]) new Object[capacity];
         int i = (nextFirst + 1) % items.length;
@@ -150,7 +158,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ArrayDeque)) {
+        if (!(o instanceof Deque)) {
             return false;
         }
         ArrayDeque<T> other = (ArrayDeque<T>) o;
