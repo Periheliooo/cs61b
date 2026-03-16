@@ -120,11 +120,11 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     }
 
     private void printInOrderHelper(BSTNode node) {
-        if (node.left == null) {
-            System.out.println(node.val);
-            printInOrderHelper(node.right);
-        } else {
-          printInOrderHelper(node.left);
+        if (node == null){
+            return;
         }
+        printInOrderHelper(node.left);
+        System.out.println(node.val);
+        printInOrderHelper(node.right);
     }
 }
