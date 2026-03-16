@@ -112,12 +112,12 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     private class LinkedListDequeIterator implements Iterator<T>{
         private Node curr;
 
-        public LinkedListDequeIterator(){
+        public LinkedListDequeIterator() {
             curr = sentinel.next;
         }
 
         @Override
-        public boolean hasNext(){
+        public boolean hasNext() {
             return curr != sentinel;
         }
 
