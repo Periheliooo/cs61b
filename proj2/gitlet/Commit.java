@@ -34,17 +34,26 @@ public class Commit implements Serializable {
         this.message = message;
         this.date = date;
         this.parent = parent;
-
+        this.snapshots = snapshots;
     }
 
-    public static Commit fromFile() {
-        Commit c = Utils.readObject();
+    //TODO
+    public static Commit fromFile(String filename) {
+        File file = Utils.join(Repository.OBJECT_DIR, filename);
+        Commit c = Utils.readObject(file, Commit.class);
         return c;
     }
 
+    /**
+     * 保存commit对象
+     */
     public void saveCommit() {
         File commitFile = Utils.join(Repository.OBJECT_DIR, Utils.sha1(this));
         Utils.writeObject(commitFile, this);
     }
     /* TODO: fill in the rest of this class. */
+
+    public Map<String, String> getSnapshots() {
+        return this.snapshots;
+    }
 }

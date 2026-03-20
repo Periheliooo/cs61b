@@ -53,7 +53,7 @@ public class Repository {
             e.printStackTrace();
         }
 
-        makeInitalCommit();
+        makeInitialCommit();
     }
 
     /**
@@ -74,20 +74,28 @@ public class Repository {
         Date epoch = new Date();
         String date = getDate(epoch);
         String parent = getParentCommitHash();
-        Map<String, String> snapshots = getStagedFiles();
+        Map<String, String> snapshots = getSnapshots();
+
         Commit c = new Commit(message, date, parent, snapshots);
         c.saveCommit();
+
+
+        Utils.writeObject(HEAD_FILE, MASTER_FILE);
+        Utils.writeObject(MASTER_FILE, sha1(c));
 
     }
 
     //TODO: 初始commit
-    public static void makeInitalCommit() {
-        String message = "inital mesaege";
+    public static void makeInitialCommit() {
+        String message = "initial commit";
         String date = getDate(new Date(0));
-        Map<String, String> snapshots = getStagedFiles();
+        Map<String, String> snapshots = getSnapshots();
+
         Commit c = new Commit(message, date, null, snapshots);
         c.saveCommit();
+
         Utils.writeObject(HEAD_FILE, MASTER_FILE);
+        Utils.writeObject(MASTER_FILE, sha1(c));
     }
 
 
@@ -108,8 +116,20 @@ public class Repository {
         return parentCommitHash;
     }
 
-    public static Map<String, String> getStagedFiles() {
-        Map<String, String> snapshots = new TreeMap<>();
-        snapshots.put();
+    public static Map<String, String> getSnapshots() {
+        Map<String, String> stagShots = StagingArea.snapshot();
+
+        String parentHash = getParentCommitHash();
+        Commit parentCommit = Commit.fromFile(parentHash);
+        Map<String, String> parentShots = parentCommit.getSnapshots();
+
+        parentShots.putAll(stagShots);
+
+        return parentShots;
+    }
+
+
+    public static void add(String filename) {
+        StagingArea.addFile(filename);
     }
 }

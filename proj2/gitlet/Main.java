@@ -19,12 +19,16 @@ public class Main {
             case "init":
                 // TODO: handle the `init` command
                 if (Repository.isInitialized()) {
-
+                    System.out.println();
+                    System.exit(0);
                 }
                 Repository.setup();
                 break;
             case "add":
-                // TODO: handle the `add [filename]` command
+                // TODO: handle the `add [filename]`
+                // 目前只考虑加一个文件
+                String filename = args[1];
+                Repository.add(filename);
                 break;
             // TODO: FILL THE REST IN
             case "commit":
