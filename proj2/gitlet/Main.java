@@ -10,15 +10,27 @@ public class Main {
      */
     public static void main(String[] args) {
         // TODO: what if args is empty?
+        if (args.length == 0) {
+            throw Utils.error("Please enter a command.");
+        }
+        
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
                 // TODO: handle the `init` command
+                if (Repository.isInitialized()) {
+
+                }
+                Repository.setup();
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
                 break;
             // TODO: FILL THE REST IN
+            case "commit":
+                break;
+            default:
+                throw Utils.error("No command with that name exists.");
         }
     }
 }

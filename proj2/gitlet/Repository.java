@@ -1,6 +1,13 @@
 package gitlet;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
+
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
@@ -24,6 +31,85 @@ public class Repository {
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
+    public static final File OBJECT_DIR = join(GITLET_DIR, "objects");
+    public static final File REF_DIR = join(GITLET_DIR, "refs");
+    public static final File HEADS_DIR = join(REF_DIR, "heads");
+    public static final File INDEX_FILE = join(GITLET_DIR, "index");
+    public static final File HEAD_FILE = join(GITLET_DIR, "head");
+    public static final File MASTER_FILE = join(HEADS_DIR, "master");
 
     /* TODO: fill in the rest of this class. */
+    public static void setup() {
+
+        GITLET_DIR.mkdir();
+        OBJECT_DIR.mkdir();
+        REF_DIR.mkdir();
+        HEADS_DIR.mkdir();
+        try {
+            INDEX_FILE.createNewFile();
+            HEAD_FILE.createNewFile();
+            MASTER_FILE.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        makeInitalCommit();
+    }
+
+    /**
+     * 判断是否init
+     * @return true
+     */
+    public static boolean isInitialized() {
+        return GITLET_DIR.exists();
+    }
+
+    /**
+     * 创建一个commit对象并保存
+     * @param m
+     */
+    public static void makeCommit(String m) {
+
+        String message = m;
+        Date epoch = new Date();
+        String date = getDate(epoch);
+        String parent = getParentCommitHash();
+        Map<String, String> snapshots = getStagedFiles();
+        Commit c = new Commit(message, date, parent, snapshots);
+        c.saveCommit();
+
+    }
+
+    //TODO: 初始commit
+    public static void makeInitalCommit() {
+        String message = "inital mesaege";
+        String date = getDate(new Date(0));
+        Map<String, String> snapshots = getStagedFiles();
+        Commit c = new Commit(message, date, null, snapshots);
+        c.saveCommit();
+        Utils.writeObject(HEAD_FILE, MASTER_FILE);
+    }
+
+
+    /**
+     * 创建commit对象时获取参数
+     * @param date
+     * @return
+     */
+    public static String getDate(Date date) {
+        // EEE: 星期几缩写, MMM: 月份缩写, d: 日期, HH:mm:ss: 24小时制时间, yyyy: 年份, Z: 时区
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
+        return sdf.format(date);
+    }
+
+    public static String getParentCommitHash() {
+        File PATH = Utils.readObject(HEAD_FILE, File.class);
+        String parentCommitHash = Utils.readObject(PATH, String.class);
+        return parentCommitHash;
+    }
+
+    public static Map<String, String> getStagedFiles() {
+        Map<String, String> snapshots = new TreeMap<>();
+        snapshots.put();
+    }
 }
