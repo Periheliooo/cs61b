@@ -19,7 +19,7 @@ public class Main {
             case "init":
                 // TODO: handle the `init` command
                 if (Repository.isInitialized()) {
-                    System.out.println();
+                    System.out.println("A Gitlet version-control system already exists in the current directory.");
                     System.exit(0);
                 }
                 Repository.setup();
@@ -27,11 +27,13 @@ public class Main {
             case "add":
                 // TODO: handle the `add [filename]`
                 // 目前只考虑加一个文件
+                Repository.checkInitialized();
                 String filename = args[1];
                 Repository.add(filename);
                 break;
             // TODO: FILL THE REST IN
             case "commit":
+                Repository.checkInitialized();
                 break;
             default:
                 throw Utils.error("No command with that name exists.");

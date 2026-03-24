@@ -64,6 +64,12 @@ public class Repository {
         return GITLET_DIR.exists();
     }
 
+    public static void checkInitialized() {
+        if (! isInitialized()) {
+            System.out.println("Not in an initialized Gitlet directory.");
+        }
+    }
+
     /**
      * 创建一个commit对象并保存
      * @param m
@@ -89,7 +95,7 @@ public class Repository {
     public static void makeInitialCommit() {
         String message = "initial commit";
         String date = getDate(new Date(0));
-        Map<String, String> snapshots = getSnapshots();
+        Map<String, String> snapshots = new TreeMap<>();
 
         Commit c = new Commit(message, date, null, snapshots);
         c.saveCommit();
@@ -116,16 +122,21 @@ public class Repository {
         return parentCommitHash;
     }
 
+    /**
+     * 将上一个commit和新修改的内容合并起来，变成一个新的snapshot
+     */
     public static Map<String, String> getSnapshots() {
         Map<String, String> stagShots = StagingArea.snapshot();
+        // 父节点的commit
+        Map<String, String> parentShots =getParentSnapshots();
+        parentShots.putAll(stagShots);
+        return parentShots;
+    }
 
+    public static Map<String, String> getParentSnapshots() {
         String parentHash = getParentCommitHash();
         Commit parentCommit = Commit.fromFile(parentHash);
-        Map<String, String> parentShots = parentCommit.getSnapshots();
-
-        parentShots.putAll(stagShots);
-
-        return parentShots;
+        return parentCommit.getSnapshots();
     }
 
 
