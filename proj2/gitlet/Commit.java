@@ -4,8 +4,6 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Date; // TODO: You'll likely use this in this class
-import java.util.EmptyStackException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -53,7 +51,7 @@ public class Commit implements Serializable {
     }
     /* TODO: fill in the rest of this class. */
 
-    public Map<String, String> getSnapshots() {
+    public Map<String, String> snapshots() {
         return this.snapshots;
     }
 
@@ -66,6 +64,9 @@ public class Commit implements Serializable {
     }
 
     public Commit getParent() {
+        if (parent == null) {
+            return null;
+        }
         File parentFile = Utils.join(Repository.OBJECT_DIR, parent);
         return Utils.readObject(parentFile, Commit.class);
     }

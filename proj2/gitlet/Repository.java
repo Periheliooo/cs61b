@@ -64,6 +64,7 @@ public class Repository {
     public static void checkInitialized() {
         if (! isInitialized()) {
             System.out.println("Not in an initialized Gitlet directory.");
+            System.exit(0);
         }
     }
 
@@ -128,13 +129,20 @@ public class Repository {
         // 父节点的commit
         Map<String, String> parentShots =getParentSnapshots();
         parentShots.putAll(stagShots);
+        rmFile(parentShots);
         return parentShots;
+    }
+
+    public static void rmFile(Map<String, String> snapshots) {
+        for (String i : StagingArea.removed()) {
+            snapshots.remove(i);
+        }
     }
 
     public static Map<String, String> getParentSnapshots() {
         String parentHash = getParentCommitHash();
         Commit parentCommit = Commit.fromFile(parentHash);
-        return parentCommit.getSnapshots();
+        return parentCommit.snapshots();
     }
 
 
@@ -143,15 +151,37 @@ public class Repository {
     }
 
     public static void log() {
-        File presentBranch = Utils.readObject(HEAD_FILE, File.class);
-        Commit c = Utils.readObject(presentBranch, Commit.class);
+        Commit c = getCurCommit();
         while (c != null) {
             System.out.println("===");
-            System.out.println("commit " + sha1(c));
+            System.out.println("commit " + sha1(serialize(c)));
             System.out.println("Date: " + c.date());
             System.out.println(c.message());
             System.out.println();
             c = c.getParent();
+        }
+    }
+
+    public static Commit getCurCommit() {
+        File presentBranch = Utils.readObject(HEAD_FILE, File.class);
+        String fileName = Utils.readObject(presentBranch, String.class);
+        File filePath = Utils.join(OBJECT_DIR, fileName);
+        Commit c = Utils.readObject(filePath, Commit.class);
+        return c;
+    }
+
+    public static void rm(String filename) {
+        Commit curCommit = getCurCommit();
+        if (curCommit.snapshots().containsKey(filename)) {
+            File targetFile = join(CWD, filename);
+            if (targetFile.exists()) {
+                targetFile.delete();
+            }
+        } else if (StagingArea.snapshot().containsKey(filename)) {
+            StagingArea.rmFromStagingArea(filename);
+        } else {
+            System.out.println("No reason to remove the file.");
+            System.exit(0);
         }
     }
 }

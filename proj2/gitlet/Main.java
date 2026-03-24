@@ -60,6 +60,15 @@ public class Main {
                 } else {
                     Repository.log();
                 }
+                break;
+            case "rm":
+                Repository.checkInitialized();
+                if (args.length == 1 || args.length > 2) {
+                    System.out.println("Incorrect operands");
+                    System.exit(0);
+                } else {
+                    Repository.rm(args[1]);
+                }
             default:
                 System.out.println("No command with that name exists.");
                 System.exit(0);

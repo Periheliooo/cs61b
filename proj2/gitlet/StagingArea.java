@@ -2,11 +2,13 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class StagingArea {
     private static Map<String, String> added;
+    private static LinkedList<String> removed;
 
     public static void addFile(String fileName) {
         load();
@@ -48,10 +50,23 @@ public class StagingArea {
         writeMap();
     }
 
+    public static void rmFromStagingArea(String filename) {
+        snapshot().remove(filename);
+        writeMap();
+    }
+
+    public static void rmFromCommit(String filename) {
+        removed.add(filename);
+    }
+
     // 返回add的文件的对应关系
     public static Map<String, String> snapshot() {
         load();
         return added;
+    }
+
+    public static LinkedList<String> removed() {
+        return removed;
     }
 
     public static String getOldFileName(String fileName) {
