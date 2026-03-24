@@ -171,6 +171,7 @@ public class Repository {
     }
 
     public static void rm(String filename) {
+        boolean flag = true;
         Commit curCommit = getCurCommit();
         if (curCommit.snapshots().containsKey(filename)) {
             File targetFile = join(CWD, filename);
@@ -178,9 +179,13 @@ public class Repository {
             if (targetFile.exists()) {
                 targetFile.delete();
             }
-        } else if (StagingArea.snapshot().containsKey(filename)) {
+            flag = false;
+        }
+        if (StagingArea.snapshot().containsKey(filename)) {
             StagingArea.rmFromStagingArea(filename);
-        } else {
+            flag = false;
+        }
+        if (flag) {
             System.out.println("No reason to remove the file.");
             System.exit(0);
         }

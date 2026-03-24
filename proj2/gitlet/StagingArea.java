@@ -98,8 +98,8 @@ public class StagingArea {
         }
 
         public StagingData() {
-            this.saveAdded = null;
-            this.saveRemoved = null;
+            this.saveAdded = new TreeMap<>();
+            this.saveRemoved = new LinkedList<>();
         }
     }
 }
