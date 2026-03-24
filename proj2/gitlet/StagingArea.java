@@ -31,7 +31,7 @@ public class StagingArea {
             writeData();
 
         } else {
-            File newPath = Utils.join(Repository.OBJECT_DIR, newFileName);
+            File newPath = Utils.join(Repository.BLOBS_DIR, newFileName);
             Utils.writeContents(newPath, contents);
             added.put(fileName, newFileName);    // 现在的名字 -> 版本的名字
             writeData();

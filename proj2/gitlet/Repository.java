@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -34,6 +35,8 @@ public class Repository {
     public static final File INDEX_FILE = join(GITLET_DIR, "index");
     public static final File HEAD_FILE = join(GITLET_DIR, "head");
     public static final File MASTER_FILE = join(HEADS_DIR, "master");
+    public static final File COMMITS_DIR = join(OBJECT_DIR, "commits");
+    public static final File BLOBS_DIR = join(OBJECT_DIR, "blobs");
 
     /* TODO: fill in the rest of this class. */
     public static void setup() {
@@ -42,6 +45,8 @@ public class Repository {
         OBJECT_DIR.mkdir();
         REF_DIR.mkdir();
         HEADS_DIR.mkdir();
+        COMMITS_DIR.mkdir();
+        BLOBS_DIR.mkdir();
         try {
             INDEX_FILE.createNewFile();
             HEAD_FILE.createNewFile();
@@ -153,12 +158,36 @@ public class Repository {
     public static void log() {
         Commit c = getCurCommit();
         while (c != null) {
-            System.out.println("===");
-            System.out.println("commit " + sha1(serialize(c)));
-            System.out.println("Date: " + c.date());
-            System.out.println(c.message());
-            System.out.println();
+            printLog(c);
             c = c.getParent();
+        }
+    }
+
+    public static void globalLog() {
+        List<String> logList = plainFilenamesIn(COMMITS_DIR);
+        for (String s : logList) {
+            File path = join(COMMITS_DIR, s);
+            Commit c = Utils.readObject(path, Commit.class);
+            printLog(c);
+        }
+    }
+
+    public static void printLog(Commit c) {
+        System.out.println("===");
+        System.out.println("commit " + sha1(serialize(c)));
+        System.out.println("Date: " + c.date());
+        System.out.println(c.message());
+        System.out.println();
+    }
+
+    public static void find(String m) {
+        List<String> logList = plainFilenamesIn(COMMITS_DIR);
+        for (String s : logList) {
+            File path = join(COMMITS_DIR, s);
+            Commit c = Utils.readObject(path, Commit.class);
+            if (c.message().equals(m)) {
+                System.out.println(sha1(serialize(c)));
+            }
         }
     }
 

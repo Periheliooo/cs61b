@@ -71,6 +71,24 @@ public class Main {
                     Repository.rm(args[1]);
                     break;
                 }
+            case  "global-log":
+                Repository.checkInitialized();
+                if (args.length > 1) {
+                    System.out.println("Incorrect operands");
+                    System.exit(0);
+                } else {
+                    Repository.globalLog();
+                    break;
+                }
+            case  "find":
+                Repository.checkInitialized();
+                if (args.length == 1 || args.length > 2) {
+                    System.out.println("Incorrect operands");
+                    System.exit(0);
+                } else {
+                    Repository.find(args[1]);
+                    break;
+                }
             default:
                 System.out.println("No command with that name exists.");
                 System.exit(0);
