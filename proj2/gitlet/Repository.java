@@ -85,6 +85,7 @@ public class Repository {
 
         Utils.writeObject(HEAD_FILE, MASTER_FILE);
         Utils.writeObject(MASTER_FILE, sha1(Utils.serialize(c)));
+        StagingArea.clear();
 
     }
 
