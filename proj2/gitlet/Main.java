@@ -27,6 +27,11 @@ public class Main {
             case "add":
                 // TODO: handle the `add [filename]`
                 // 目前只考虑加一个文件
+                if (args.length == 0) {
+                    System.out.println("Please enter a command.");
+                    System.exit(0);
+                }
+
                 Repository.checkInitialized();
                 String filename = args[1];
                 Repository.add(filename);

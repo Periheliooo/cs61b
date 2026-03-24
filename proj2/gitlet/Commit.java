@@ -48,7 +48,7 @@ public class Commit implements Serializable {
      * 保存commit对象
      */
     public void saveCommit() {
-        File commitFile = Utils.join(Repository.OBJECT_DIR, Utils.sha1(this));
+        File commitFile = Utils.join(Repository.OBJECT_DIR, Utils.sha1(Utils.serialize(this)));
         Utils.writeObject(commitFile, this);
     }
     /* TODO: fill in the rest of this class. */

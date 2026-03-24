@@ -3,10 +3,7 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -87,7 +84,7 @@ public class Repository {
 
 
         Utils.writeObject(HEAD_FILE, MASTER_FILE);
-        Utils.writeObject(MASTER_FILE, sha1(c));
+        Utils.writeObject(MASTER_FILE, sha1(Utils.serialize(c)));
 
     }
 
@@ -101,7 +98,7 @@ public class Repository {
         c.saveCommit();
 
         Utils.writeObject(HEAD_FILE, MASTER_FILE);
-        Utils.writeObject(MASTER_FILE, sha1(c));
+        Utils.writeObject(MASTER_FILE, sha1(Utils.serialize(c)));
     }
 
 
@@ -113,6 +110,7 @@ public class Repository {
     public static String getDate(Date date) {
         // EEE: 星期几缩写, MMM: 月份缩写, d: 日期, HH:mm:ss: 24小时制时间, yyyy: 年份, Z: 时区
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT-0800"));   // 强制 UTC-8
         return sdf.format(date);
     }
 
