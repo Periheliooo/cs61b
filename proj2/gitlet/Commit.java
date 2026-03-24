@@ -56,4 +56,17 @@ public class Commit implements Serializable {
     public Map<String, String> getSnapshots() {
         return this.snapshots;
     }
+
+    public String date() {
+        return date;
+    }
+
+    public String message() {
+        return message;
+    }
+
+    public Commit getParent() {
+        File parentFile = Utils.join(Repository.OBJECT_DIR, parent);
+        return Utils.readObject(parentFile, Commit.class);
+    }
 }

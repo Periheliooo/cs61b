@@ -82,14 +82,15 @@ public class Repository {
         Commit c = new Commit(message, date, parent, snapshots);
         c.saveCommit();
 
-
-        Utils.writeObject(HEAD_FILE, MASTER_FILE);
-        Utils.writeObject(MASTER_FILE, sha1(Utils.serialize(c)));
+        //TODO: 分支更改
+        File presentBranch = Utils.readObject(HEAD_FILE, File.class);
+        // Utils.writeObject(HEAD_FILE, MASTER_FILE);    这边似乎不用修改，可能是branch操作修改
+        Utils.writeObject(presentBranch, sha1(Utils.serialize(c)));
         StagingArea.clear();
 
     }
 
-    //TODO: 初始commit
+    //初始commit
     public static void makeInitialCommit() {
         String message = "initial commit";
         String date = getDate(new Date(0));
@@ -105,8 +106,6 @@ public class Repository {
 
     /**
      * 创建commit对象时获取参数
-     * @param date
-     * @return
      */
     public static String getDate(Date date) {
         // EEE: 星期几缩写, MMM: 月份缩写, d: 日期, HH:mm:ss: 24小时制时间, yyyy: 年份, Z: 时区
@@ -141,5 +140,18 @@ public class Repository {
 
     public static void add(String filename) {
         StagingArea.addFile(filename);
+    }
+
+    public static void log() {
+        File presentBranch = Utils.readObject(HEAD_FILE, File.class);
+        Commit c = Utils.readObject(presentBranch, Commit.class);
+        while (c != null) {
+            System.out.println("===");
+            System.out.println("commit " + sha1(c));
+            System.out.println("Date: " + c.date());
+            System.out.println(c.message());
+            System.out.println();
+            c = c.getParent();
+        }
     }
 }

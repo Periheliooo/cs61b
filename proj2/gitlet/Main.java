@@ -52,8 +52,17 @@ public class Main {
                     Repository.makeCommit(args[1]);
                 }
                 break;
+            case "log":
+                Repository.checkInitialized();
+                if (args.length > 1) {
+                    System.out.println("Incorrect operands");
+                    System.exit(0);
+                } else {
+                    Repository.log();
+                }
             default:
-                throw Utils.error("No command with that name exists.");
+                System.out.println("No command with that name exists.");
+                System.exit(0);
         }
     }
 }
