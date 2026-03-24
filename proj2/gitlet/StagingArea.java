@@ -7,11 +7,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class StagingArea {
-    private static Map<String, String> added;
-    private static LinkedList<String> removed;
+    private static StagingData d = readData();
+    private static Map<String, String> added = d.saveAdded;
+    private static LinkedList<String> removed = d.saveRemoved;
 
     public static void addFile(String fileName) {
-        load();
+
         File file = Utils.join(Repository.CWD, fileName);
 
         // 文件不存在情况
@@ -27,41 +28,36 @@ public class StagingArea {
         // 改回原样时从暂存区删去
         if (newFileName.equals(oldFileName)) {
             added.remove(fileName);
-            writeMap();
+            writeData();
 
         } else {
             File newPath = Utils.join(Repository.OBJECT_DIR, newFileName);
             Utils.writeContents(newPath, contents);
             added.put(fileName, newFileName);    // 现在的名字 -> 版本的名字
-            writeMap();
+            writeData();
 
-        }
-    }
-
-    private static void load() {
-        if (added == null) {
-            added = readMap();
         }
     }
 
     // commit之后应该清楚缓存区
     public static void clear() {
         added = new TreeMap<>();
-        writeMap();
+        removed = new LinkedList<>();
+        writeData();
     }
 
     public static void rmFromStagingArea(String filename) {
-        snapshot().remove(filename);
-        writeMap();
+        added.remove(filename);
+        writeData();
     }
 
     public static void rmFromCommit(String filename) {
         removed.add(filename);
+        writeData();
     }
 
     // 返回add的文件的对应关系
     public static Map<String, String> snapshot() {
-        load();
         return added;
     }
 
@@ -78,16 +74,32 @@ public class StagingArea {
         }
     }
 
-    public static void writeMap() {
-        Utils.writeObject(Repository.INDEX_FILE, (Serializable) added);
+    public static void writeData() {
+        StagingData d = new StagingData((TreeMap<String, String>) added, removed);
+        Utils.writeObject(Repository.INDEX_FILE, d);
     }
 
     //从index中读取Map
-    public static TreeMap<String, String> readMap() {
+    private static StagingData readData() {
         // 检查文件长度。如果为 0，说明还没存过东西
         if (!Repository.INDEX_FILE.exists() || Repository.INDEX_FILE.length() == 0) {
-            return new TreeMap<>(); // 返回空 Map 供后续逻辑使用
+            return new StagingData(); // 返回空 Map 供后续逻辑使用
         }
-        return (TreeMap<String, String>) Utils.readObject(Repository.INDEX_FILE, TreeMap.class);
+        return Utils.readObject(Repository.INDEX_FILE, StagingData.class);
+    }
+
+    private static class StagingData implements Serializable {
+        TreeMap<String, String> saveAdded;
+        LinkedList<String> saveRemoved;
+
+        public StagingData(TreeMap<String, String> a, LinkedList<String> r) {
+            this.saveAdded = a;
+            this.saveRemoved = r;
+        }
+
+        public StagingData() {
+            this.saveAdded = null;
+            this.saveRemoved = null;
+        }
     }
 }

@@ -68,6 +68,7 @@ public class Main {
                     System.exit(0);
                 } else {
                     Repository.rm(args[1]);
+                    break;
                 }
             default:
                 System.out.println("No command with that name exists.");

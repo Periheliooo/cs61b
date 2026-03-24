@@ -174,6 +174,7 @@ public class Repository {
         Commit curCommit = getCurCommit();
         if (curCommit.snapshots().containsKey(filename)) {
             File targetFile = join(CWD, filename);
+            StagingArea.rmFromCommit(filename);
             if (targetFile.exists()) {
                 targetFile.delete();
             }
