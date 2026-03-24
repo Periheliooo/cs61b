@@ -73,6 +73,6 @@ public class StagingArea {
         if (!Repository.INDEX_FILE.exists() || Repository.INDEX_FILE.length() == 0) {
             return new TreeMap<>(); // 返回空 Map 供后续逻辑使用
         }
-        return Utils.readObject(Repository.INDEX_FILE, TreeMap.class);
+        return (TreeMap<String, String>) Utils.readObject(Repository.INDEX_FILE, TreeMap.class);
     }
 }

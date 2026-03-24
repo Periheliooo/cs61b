@@ -27,8 +27,8 @@ public class Main {
             case "add":
                 // TODO: handle the `add [filename]`
                 // 目前只考虑加一个文件
-                if (args.length == 0) {
-                    System.out.println("Please enter a command.");
+                if (args.length != 2) {
+                    System.out.println("Incorrect operands.");
                     System.exit(0);
                 }
 
@@ -39,6 +39,18 @@ public class Main {
             // TODO: FILL THE REST IN
             case "commit":
                 Repository.checkInitialized();
+                if (StagingArea.snapshot().isEmpty()) {
+                    System.out.println("No changes added to the commit.");
+                    System.exit(0);
+                } else if (args.length == 1) {
+                    System.out.println("Please enter a commit message.");
+                    System.exit(0);
+                } else if (args.length > 2) {
+                    System.out.println("Incorrect operands");
+                    System.exit(0);
+                } else {
+                    Repository.makeCommit(args[1]);
+                }
                 break;
             default:
                 throw Utils.error("No command with that name exists.");
