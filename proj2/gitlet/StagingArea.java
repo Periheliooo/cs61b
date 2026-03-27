@@ -57,7 +57,7 @@ public class StagingArea {
     }
 
     // 返回add的文件的对应关系
-    public static Map<String, String> snapshot() {
+    public static Map<String, String> added() {
         return added;
     }
 

@@ -40,7 +40,7 @@ public class Main {
             // TODO: FILL THE REST IN
             case "commit":
                 Repository.checkInitialized();
-                if (StagingArea.snapshot().isEmpty()) {
+                if (StagingArea.added().isEmpty()) {
                     System.out.println("No changes added to the commit.");
                     System.exit(0);
                 } else if (args.length == 1) {
@@ -71,7 +71,7 @@ public class Main {
                     Repository.rm(args[1]);
                     break;
                 }
-            case  "global-log":
+            case "global-log":
                 Repository.checkInitialized();
                 if (args.length > 1) {
                     System.out.println("Incorrect operands");
@@ -80,13 +80,22 @@ public class Main {
                     Repository.globalLog();
                     break;
                 }
-            case  "find":
+            case "find":
                 Repository.checkInitialized();
                 if (args.length == 1 || args.length > 2) {
                     System.out.println("Incorrect operands");
                     System.exit(0);
                 } else {
                     Repository.find(args[1]);
+                    break;
+                }
+            case "status":
+                Repository.checkInitialized();
+                if (args.length > 1) {
+                    System.out.println("Incorrect operands");
+                    System.exit(0);
+                } else {
+                    Repository.status();
                     break;
                 }
             default:

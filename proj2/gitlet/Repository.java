@@ -2,7 +2,6 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -75,7 +74,6 @@ public class Repository {
 
     /**
      * 创建一个commit对象并保存
-     * @param m
      */
     public static void makeCommit(String m) {
 
@@ -89,9 +87,9 @@ public class Repository {
         c.saveCommit();
 
         //TODO: 分支更改
-        File presentBranch = Utils.readObject(HEAD_FILE, File.class);
+        File curBranch = Utils.readObject(HEAD_FILE, File.class);
         // Utils.writeObject(HEAD_FILE, MASTER_FILE);    这边似乎不用修改，可能是branch操作修改
-        Utils.writeObject(presentBranch, sha1(Utils.serialize(c)));
+        Utils.writeObject(curBranch, sha1(Utils.serialize(c)));
         StagingArea.clear();
 
     }
@@ -122,15 +120,14 @@ public class Repository {
 
     public static String getParentCommitHash() {
         File PATH = Utils.readObject(HEAD_FILE, File.class);
-        String parentCommitHash = Utils.readObject(PATH, String.class);
-        return parentCommitHash;
+        return Utils.readObject(PATH, String.class);
     }
 
     /**
      * 将上一个commit和新修改的内容合并起来，变成一个新的snapshot
      */
     public static Map<String, String> getSnapshots() {
-        Map<String, String> stagShots = StagingArea.snapshot();
+        Map<String, String> stagShots = StagingArea.added();
         // 父节点的commit
         Map<String, String> parentShots =getParentSnapshots();
         parentShots.putAll(stagShots);
@@ -191,12 +188,71 @@ public class Repository {
         }
     }
 
+    public static void status() {
+        printBranches();
+        printStagedFiles();
+        printRemovedFiles();
+        printModifications();
+        printUntrackedFiles();
+    }
+
+    public static void printBranches() {
+        //TODO： Branches
+        System.out.println("=== Branches ===");
+        File curBranch = readObject(HEAD_FILE, File.class);
+        System.out.println();
+    }
+
+    public static void printStagedFiles() {
+        System.out.println("=== Staged Files ===");
+        Map<String, String> stagedFileList = StagingArea.added();
+        for (String s : stagedFileList.keySet()) {
+            System.out.println(s);
+        }
+        System.out.println();
+    }
+
+    public static void printRemovedFiles() {
+        System.out.println("=== Removed Files ===");
+        LinkedList<String> removedFileList = StagingArea.removed();
+        for (String s : removedFileList) {
+            System.out.println(s);
+        }
+        System.out.println();
+    }
+
+    public static void printModifications() {
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        List<String> allFiles = plainFilenamesIn(CWD);
+        Map<String, String> snapshots = getSnapshots();
+        Set<String> snapFiles = snapshots.keySet();
+        for (String s : snapFiles) {
+            if (!allFiles.contains(s)){
+                System.out.println(s + " (deleted)");
+            } else if (!snapshots.get(s).equals(sha1(readContents(join(CWD, s))))) {
+                System.out.println(s + " (modified)");
+            }
+        }
+        System.out.println();
+    }
+
+    public static void printUntrackedFiles() {
+        System.out.println("=== Untracked Files ===");
+        List<String> allFiles = plainFilenamesIn(CWD);
+        Set<String> snapFiles = getSnapshots().keySet();
+        for (String s : allFiles) {
+            if (!snapFiles.contains(s)){
+                System.out.println(s);
+            }
+        }
+        System.out.println();
+    }
+
     public static Commit getCurCommit() {
         File presentBranch = Utils.readObject(HEAD_FILE, File.class);
         String fileName = Utils.readObject(presentBranch, String.class);
         File filePath = Utils.join(OBJECT_DIR, fileName);
-        Commit c = Utils.readObject(filePath, Commit.class);
-        return c;
+        return Utils.readObject(filePath, Commit.class);
     }
 
     public static void rm(String filename) {
@@ -210,7 +266,7 @@ public class Repository {
             }
             flag = false;
         }
-        if (StagingArea.snapshot().containsKey(filename)) {
+        if (StagingArea.added().containsKey(filename)) {
             StagingArea.rmFromStagingArea(filename);
             flag = false;
         }
