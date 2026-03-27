@@ -129,7 +129,7 @@ public class Repository {
     public static Map<String, String> getSnapshots() {
         Map<String, String> stagShots = StagingArea.added();
         // 父节点的commit
-        Map<String, String> parentShots =getParentSnapshots();
+        Map<String, String> parentShots = new TreeMap<>(getParentSnapshots());
         parentShots.putAll(stagShots);
         rmFile(parentShots);
         return parentShots;
@@ -179,12 +179,17 @@ public class Repository {
 
     public static void find(String m) {
         List<String> logList = plainFilenamesIn(COMMITS_DIR);
+        boolean flag = false;
         for (String s : logList) {
             File path = join(COMMITS_DIR, s);
             Commit c = Utils.readObject(path, Commit.class);
             if (c.message().equals(m)) {
                 System.out.println(sha1(serialize(c)));
+                flag = true;
             }
+        }
+        if (!flag) {
+            System.out.println("Found no commit with that message.");
         }
     }
 
@@ -197,9 +202,17 @@ public class Repository {
     }
 
     public static void printBranches() {
-        //TODO： Branches
         System.out.println("=== Branches ===");
         File curBranch = readObject(HEAD_FILE, File.class);
+        List<String> allFile = plainFilenamesIn(HEADS_DIR);
+        Collections.sort(allFile);
+        for (String s : allFile) {
+            if (s.equals(curBranch.getName())) {
+                System.out.println("*" + s);
+            } else {
+                System.out.println(s);
+            }
+        }
         System.out.println();
     }
 
@@ -215,6 +228,7 @@ public class Repository {
     public static void printRemovedFiles() {
         System.out.println("=== Removed Files ===");
         LinkedList<String> removedFileList = StagingArea.removed();
+        Collections.sort(removedFileList);
         for (String s : removedFileList) {
             System.out.println(s);
         }
@@ -251,7 +265,7 @@ public class Repository {
     public static Commit getCurCommit() {
         File presentBranch = Utils.readObject(HEAD_FILE, File.class);
         String fileName = Utils.readObject(presentBranch, String.class);
-        File filePath = Utils.join(OBJECT_DIR, fileName);
+        File filePath = Utils.join(COMMITS_DIR, fileName);
         return Utils.readObject(filePath, Commit.class);
     }
 
