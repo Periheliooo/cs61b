@@ -237,11 +237,11 @@ public class Repository {
 
     public static void printModifications() {
         System.out.println("=== Modifications Not Staged For Commit ===");
-        List<String> allFiles = plainFilenamesIn(CWD);
+        List<String> curFiles = plainFilenamesIn(CWD);
         Map<String, String> snapshots = getSnapshots();
         Set<String> snapFiles = snapshots.keySet();
         for (String s : snapFiles) {
-            if (!allFiles.contains(s)){
+            if (!curFiles.contains(s)){
                 System.out.println(s + " (deleted)");
             } else if (!snapshots.get(s).equals(sha1(readContents(join(CWD, s))))) {
                 System.out.println(s + " (modified)");
@@ -252,9 +252,9 @@ public class Repository {
 
     public static void printUntrackedFiles() {
         System.out.println("=== Untracked Files ===");
-        List<String> allFiles = plainFilenamesIn(CWD);
+        List<String> curFiles = plainFilenamesIn(CWD);
         Set<String> snapFiles = getSnapshots().keySet();
-        for (String s : allFiles) {
+        for (String s : curFiles) {
             if (!snapFiles.contains(s)){
                 System.out.println(s);
             }
@@ -287,6 +287,72 @@ public class Repository {
         if (flag) {
             System.out.println("No reason to remove the file.");
             System.exit(0);
+        }
+    }
+
+    public static void checkoutFile(String fileName){
+        File f = readObject(HEAD_FILE, File.class);
+        String commitId = sha1(readObject(f, Commit.class));
+        checkoutFile(commitId, fileName);
+    }
+
+    public static void checkoutFile(String commitId, String fileName) {
+        File f = join(COMMITS_DIR, commitId);
+        if (!f.exists()) {
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        } else {
+            Commit c = readObject(f, Commit.class);
+            Map<String, String> snapshots = c.snapshots();
+            if (snapshots.containsKey(fileName)) {
+                String fileId = snapshots.get(fileName);
+                byte[] content = readObject(join(BLOBS_DIR, fileId), byte[].class);
+                writeContents(join(CWD, fileName), content);
+            } else {
+                System.out.println("File does not exist in that commit.");
+                System.exit(0);
+            }
+        }
+    }
+
+    public static void checkoutBranch(String branchName) {
+        File f = join(HEADS_DIR, branchName);
+        if (!f.exists()) {
+            System.out.println("No such branch exists.");
+            System.exit(0);
+        } else if (f.equals(readObject(HEAD_FILE, File.class))) {
+            System.out.println("No need to checkout the current branch.");
+        } else if (!StagingArea.checkAllStaged()) {
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
+        } else {
+            Commit c = readObject(join(HEADS_DIR, branchName), Commit.class);
+            Map<String, String> snapshots = c.snapshots();
+            List<String> curFiles = plainFilenamesIn(CWD);
+            for (String s : snapshots.keySet()) {
+                if (curFiles.contains(s)) {
+                    String fileId = c.snapshots().get(s);
+                    byte[] content = readObject(join(BLOBS_DIR, fileId), byte[].class);
+                    writeContents(join(CWD, s), content);
+                } else {    //似乎应该所有文件都被add了，也就不会出现这种情况
+                    File targetF = join(CWD, s);
+                    try {
+                        targetF.createNewFile();
+                        String fileId = c.snapshots().get(s);
+                        byte[] content = readObject(join(BLOBS_DIR, fileId), byte[].class);
+                        writeContents(targetF, content);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            for (String s : curFiles) {
+                if (!snapshots.containsKey(s)) {
+                    join(CWD, s).delete();
+                }
+            }
+            StagingArea.clear();
+            writeObject(HEAD_FILE, join(HEADS_DIR, branchName));
         }
     }
 }

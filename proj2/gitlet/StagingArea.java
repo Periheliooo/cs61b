@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 public class StagingArea {
@@ -67,11 +68,7 @@ public class StagingArea {
 
     public static String getOldFileName(String fileName) {
         Map<String, String> parentShots = Repository.getParentSnapshots();
-        if (parentShots.containsKey(fileName)) {
-            return parentShots.get(fileName);
-        } else {
-            return null;
-        }
+        return parentShots.getOrDefault(fileName, null);
     }
 
     public static void writeData() {
@@ -101,5 +98,25 @@ public class StagingArea {
             this.saveAdded = new TreeMap<>();
             this.saveRemoved = new LinkedList<>();
         }
+    }
+
+    public static void checkoutBranch(Commit c) {
+        Map<String, String> snapshots = c.snapshots();
+        for (String s : added.keySet()) {
+            if (!snapshots.containsKey(s)) {
+                added.remove(s);
+            }
+        }
+    }
+
+    public static boolean checkAllStaged() {
+        boolean flag = true;
+        for (String s : Objects.requireNonNull(Utils.plainFilenamesIn(Repository.CWD))) {
+            if (!added.containsKey(s)) {
+                flag = false;
+                break;
+            }
+        }
+        return flag;
     }
 }

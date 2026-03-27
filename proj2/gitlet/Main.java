@@ -98,6 +98,18 @@ public class Main {
                     Repository.status();
                     break;
                 }
+            case "checkout":
+                Repository.checkInitialized();
+                if (args[1] == "--") {
+
+                } else if () {
+
+                } else if () {
+
+                } else {
+                    System.out.println("Incorrect operands");
+                    System.exit(0);
+                }
             default:
                 System.out.println("No command with that name exists.");
                 System.exit(0);
