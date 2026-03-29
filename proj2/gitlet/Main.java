@@ -103,7 +103,7 @@ public class Main {
                 if (args.length == 3 && args[1].equals("--")) {
                     Repository.checkoutFile(args[2]);
                 } else if (args.length == 4 && args[2].equals("--")) {
-                    Repository.checkoutFile(args[1], args[2]);
+                    Repository.checkoutFile(args[1], args[3]);
                 } else if (args.length == 2) {
                     Repository.checkoutBranch(args[1]);
                 } else {

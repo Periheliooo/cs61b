@@ -315,7 +315,7 @@ public class Repository {
             Map<String, String> snapshots = c.snapshots();
             if (snapshots.containsKey(fileName)) {
                 String fileId = snapshots.get(fileName);
-                byte[] content = readObject(join(BLOBS_DIR, fileId), byte[].class);
+                byte[] content = readContents(join(BLOBS_DIR, fileId));
                 writeContents(join(CWD, fileName), content);
             } else {
                 System.out.println("File does not exist in that commit.");
@@ -338,11 +338,12 @@ public class Repository {
             Commit c = readObject(f, Commit.class);
             Map<String, String> snapshots = c.snapshots();
             List<String> curFiles = plainFilenamesIn(CWD);
-            for (String s : curFiles) {
-                if (snapshots.keySet().contains(s)) {    //目标和当前都有
-                    byte[] content = readContents(join(BLOBS_DIR, snapshots.get(s)));
-                    writeContents(join(CWD, s), content);
-                } else {    //目标有当前没有
+            for (String s : snapshots.keySet()) {
+                byte[] content = readContents(join(BLOBS_DIR, snapshots.get(s)));
+                writeContents(join(CWD, s), content);
+            }
+            for (String s : getSnapshots().keySet()) {
+                if (!snapshots.keySet().contains(s)) {
                     join(CWD, s).delete();
                 }
             }
