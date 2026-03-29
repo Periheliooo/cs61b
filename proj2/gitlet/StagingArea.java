@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
+import static gitlet.Utils.*;
+
 public class StagingArea {
     private static StagingData d = readData();
     private static Map<String, String> added = d.saveAdded;
@@ -109,10 +111,11 @@ public class StagingArea {
         }
     }
 
-    public static boolean checkAllStaged() {
+    public static boolean checkAllTracked(String branchName) {
         boolean flag = true;
-        for (String s : Objects.requireNonNull(Utils.plainFilenamesIn(Repository.CWD))) {
-            if (!added.containsKey(s)) {
+        Commit c = readObject(join(Repository.HEADS_DIR, branchName), Commit.class);
+        for (String s : c.snapshots().keySet()) {
+            if (plainFilenamesIn(Repository.CWD).contains(s) && !added.containsKey(s)) {
                 flag = false;
                 break;
             }

@@ -292,11 +292,20 @@ public class Repository {
 
     public static void checkoutFile(String fileName){
         File f = readObject(HEAD_FILE, File.class);
-        String commitId = sha1(readObject(f, Commit.class));
+        String commitId = readObject(f, String.class);
         checkoutFile(commitId, fileName);
     }
 
     public static void checkoutFile(String commitId, String fileName) {
+        if (commitId.length() < 40) {
+            List<String> allCommits = plainFilenamesIn(COMMITS_DIR);
+            for (String id : allCommits) {
+                if (id.startsWith(commitId)) {
+                    commitId = id;
+                    break;
+                }
+            }
+        }
         File f = join(COMMITS_DIR, commitId);
         if (!f.exists()) {
             System.out.println("No commit with that id exists.");
@@ -322,32 +331,18 @@ public class Repository {
             System.exit(0);
         } else if (f.equals(readObject(HEAD_FILE, File.class))) {
             System.out.println("No need to checkout the current branch.");
-        } else if (!StagingArea.checkAllStaged()) {
+        } else if (!StagingArea.checkAllTracked(branchName)) {
             System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
             System.exit(0);
         } else {
-            Commit c = readObject(join(HEADS_DIR, branchName), Commit.class);
+            Commit c = readObject(f, Commit.class);
             Map<String, String> snapshots = c.snapshots();
             List<String> curFiles = plainFilenamesIn(CWD);
-            for (String s : snapshots.keySet()) {
-                if (curFiles.contains(s)) {
-                    String fileId = c.snapshots().get(s);
-                    byte[] content = readObject(join(BLOBS_DIR, fileId), byte[].class);
-                    writeContents(join(CWD, s), content);
-                } else {    //似乎应该所有文件都被add了，也就不会出现这种情况
-                    File targetF = join(CWD, s);
-                    try {
-                        targetF.createNewFile();
-                        String fileId = c.snapshots().get(s);
-                        byte[] content = readObject(join(BLOBS_DIR, fileId), byte[].class);
-                        writeContents(targetF, content);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
             for (String s : curFiles) {
-                if (!snapshots.containsKey(s)) {
+                if (snapshots.keySet().contains(s)) {    //目标和当前都有
+                    byte[] content = readContents(join(BLOBS_DIR, snapshots.get(s)));
+                    writeContents(join(CWD, s), content);
+                } else {    //目标有当前没有
                     join(CWD, s).delete();
                 }
             }
