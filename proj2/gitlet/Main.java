@@ -69,8 +69,8 @@ public class Main {
                     System.exit(0);
                 } else {
                     Repository.rm(args[1]);
-                    break;
                 }
+                break;
             case "global-log":
                 Repository.checkInitialized();
                 if (args.length > 1) {
@@ -78,8 +78,8 @@ public class Main {
                     System.exit(0);
                 } else {
                     Repository.globalLog();
-                    break;
                 }
+                break;
             case "find":
                 Repository.checkInitialized();
                 if (args.length == 1 || args.length > 2) {
@@ -87,8 +87,8 @@ public class Main {
                     System.exit(0);
                 } else {
                     Repository.find(args[1]);
-                    break;
                 }
+                break;
             case "status":
                 Repository.checkInitialized();
                 if (args.length > 1) {
@@ -96,8 +96,8 @@ public class Main {
                     System.exit(0);
                 } else {
                     Repository.status();
-                    break;
                 }
+                break;
             case "checkout":
                 Repository.checkInitialized();
                 if (args.length == 3 && args[1].equals("--")) {
@@ -110,6 +110,7 @@ public class Main {
                     System.out.println("Incorrect operands");
                     System.exit(0);
                 }
+                break;
             case "branch":
                 Repository.checkInitialized();
                 if(args.length == 2) {
@@ -118,6 +119,7 @@ public class Main {
                     System.out.println("Incorrect operands");
                     System.exit(0);
                 }
+                break;
             case "rm-branch":
                 Repository.checkInitialized();
                 if(args.length == 2) {
@@ -126,6 +128,9 @@ public class Main {
                     System.out.println("Incorrect operands");
                     System.exit(0);
                 }
+                break;
+            case "reset":
+                Repository.checkInitialized();
             default:
                 System.out.println("No command with that name exists.");
                 System.exit(0);

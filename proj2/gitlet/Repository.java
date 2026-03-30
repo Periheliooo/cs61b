@@ -335,7 +335,8 @@ public class Repository {
             System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
             System.exit(0);
         } else {
-            Commit c = readObject(f, Commit.class);
+            String commitId = readObject(f, String.class);
+            Commit c = readObject(join(COMMITS_DIR, commitId), Commit.class);
             Map<String, String> snapshots = c.snapshots();
             for (String s : snapshots.keySet()) {
                 byte[] content = readContents(join(BLOBS_DIR, snapshots.get(s)));
@@ -352,16 +353,18 @@ public class Repository {
     }
 
     public static void branch(String branchName) {
-        File newBranch = join(REF_DIR, branchName);
+        File newBranch = join(HEADS_DIR, branchName);
         if (newBranch.exists()) {
             System.out.println("A branch with that name already exist.");
             System.exit(0);
         }
-        writeObject(newBranch, sha1((Object) serialize(getCurCommit())));
+        File curBranch = readObject(HEAD_FILE, File.class);
+        String headHash = readObject(curBranch, String.class);
+        writeObject(newBranch, headHash);
     }
 
     public static void rmBranch(String branchName) {
-        File branch = join(REF_DIR, branchName);
+        File branch = join(HEADS_DIR, branchName);
         if (branch.exists()) {
             if (readObject(HEAD_FILE, File.class).getName().equals(branch)) {
                 System.out.println("Cannot remove the current branch.");
@@ -370,7 +373,7 @@ public class Repository {
                 join(HEADS_DIR, branchName).delete();
             }
         } else {
-            System.out.println("A branch with that name does not exist.");
+            System.out.println("A branch with that name does not exists.");
             System.exit(0);
         }
     }
