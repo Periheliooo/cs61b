@@ -366,7 +366,7 @@ public class Repository {
     public static void rmBranch(String branchName) {
         File branch = join(HEADS_DIR, branchName);
         if (branch.exists()) {
-            if (readObject(HEAD_FILE, File.class).getName().equals(branch)) {
+            if (readObject(HEAD_FILE, File.class).getName().equals(branchName)) {
                 System.out.println("Cannot remove the current branch.");
                 System.exit(0);
             } else {

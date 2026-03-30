@@ -38,7 +38,7 @@ public class Main {
                 if (StagingArea.added().isEmpty() && StagingArea.removed().isEmpty()) {
                     System.out.println("No changes added to the commit.");
                     System.exit(0);
-                } else if (args.length == 1) {
+                } else if (args.length == 1 || args[1].equals("")) {
                     System.out.println("Please enter a commit message.");
                     System.exit(0);
                 } else if (args.length > 2) {
