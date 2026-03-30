@@ -7,18 +7,11 @@ import java.util.*;
 
 import static gitlet.Utils.*;
 
-// TODO: any imports you need here
-
 /** Represents a gitlet repository.
- *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
- *
- *  @author TODO
  */
 public class Repository {
     /**
-     * TODO: add instance variables here.
-     *
      * List all instance variables of the Repository class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided two examples for you.
@@ -37,7 +30,6 @@ public class Repository {
     public static final File COMMITS_DIR = join(OBJECT_DIR, "commits");
     public static final File BLOBS_DIR = join(OBJECT_DIR, "blobs");
 
-    /* TODO: fill in the rest of this class. */
     public static void setup() {
 
         GITLET_DIR.mkdir();
@@ -66,7 +58,7 @@ public class Repository {
     }
 
     public static void checkInitialized() {
-        if (! isInitialized()) {
+        if (!isInitialized()) {
             System.out.println("Not in an initialized Gitlet directory.");
             System.exit(0);
         }
@@ -86,7 +78,6 @@ public class Repository {
         Commit c = new Commit(message, date, parent, snapshots);
         c.saveCommit();
 
-        //TODO: 分支更改
         File curBranch = Utils.readObject(HEAD_FILE, File.class);
         // Utils.writeObject(HEAD_FILE, MASTER_FILE);    这边似乎不用修改，可能是branch操作修改
         Utils.writeObject(curBranch, sha1(Utils.serialize(c)));
@@ -119,8 +110,8 @@ public class Repository {
     }
 
     public static String getParentCommitHash() {
-        File PATH = Utils.readObject(HEAD_FILE, File.class);
-        return Utils.readObject(PATH, String.class);
+        File path = Utils.readObject(HEAD_FILE, File.class);
+        return Utils.readObject(path, String.class);
     }
 
     /**

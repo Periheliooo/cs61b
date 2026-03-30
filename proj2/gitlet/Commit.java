@@ -1,21 +1,15 @@
 package gitlet;
 
-// TODO: any imports you need here
-
 import java.io.File;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.TreeMap;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
- *
- *  @author TODO
  */
 public class Commit implements Serializable {
     /**
-     * TODO: add instance variables here.
      *
      * List all instance variables of the Commit class here with a useful
      * comment above them describing what that variable represents and how that
@@ -25,8 +19,8 @@ public class Commit implements Serializable {
     /** The message of this Commit. */
     private static final long serialVersionUID = 1L;
     private String message;
-    private String date;   // TODO: 时间
-    private String parent;   // TODO:
+    private String date;
+    private String parent;
     private Map<String, String> snapshots = new TreeMap<>();
 
     public Commit(String message, String date, String parent, Map<String, String> snapshots) {
@@ -36,7 +30,6 @@ public class Commit implements Serializable {
         this.snapshots = snapshots;
     }
 
-    //TODO
     public static Commit fromFile(String filename) {
         File file = Utils.join(Repository.COMMITS_DIR, filename);
         Commit c = Utils.readObject(file, Commit.class);
@@ -50,7 +43,6 @@ public class Commit implements Serializable {
         File commitFile = Utils.join(Repository.COMMITS_DIR, Utils.sha1(Utils.serialize(this)));
         Utils.writeObject(commitFile, this);
     }
-    /* TODO: fill in the rest of this class. */
 
     public Map<String, String> snapshots() {
         return this.snapshots;

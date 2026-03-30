@@ -1,7 +1,6 @@
 package gitlet;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
- *  @author TODO
  */
 public class Main {
 
@@ -9,7 +8,6 @@ public class Main {
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
     public static void main(String[] args) {
-        // TODO: what if args is empty?
         if (args.length == 0) {
             System.out.println("Please enter a command.");
             System.exit(0);
@@ -18,7 +16,6 @@ public class Main {
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
-                // TODO: handle the `init` command
                 if (Repository.isInitialized()) {
                     System.out.println("A Gitlet version-control system already exists in the current directory.");
                     System.exit(0);
@@ -26,7 +23,6 @@ public class Main {
                 Repository.setup();
                 break;
             case "add":
-                // TODO: handle the `add [filename]`
                 // 目前只考虑加一个文件
                 if (args.length != 2) {
                     System.out.println("Incorrect operands.");
@@ -37,7 +33,6 @@ public class Main {
                 String filename = args[1];
                 Repository.add(filename);
                 break;
-            // TODO: FILL THE REST IN
             case "commit":
                 Repository.checkInitialized();
                 if (StagingArea.added().isEmpty() && StagingArea.removed().isEmpty()) {

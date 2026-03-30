@@ -10,9 +10,9 @@ import java.util.TreeMap;
 import static gitlet.Utils.*;
 
 public class StagingArea {
-    private static final StagingData d = readData();
-    private static Map<String, String> added = d.saveAdded;
-    private static LinkedList<String> removed = d.saveRemoved;
+    private static final StagingData DATA = readData();
+    private static Map<String, String> added = DATA.saveAdded;
+    private static LinkedList<String> removed = DATA.saveRemoved;
 
     public static void addFile(String fileName) {
 
@@ -75,8 +75,8 @@ public class StagingArea {
     }
 
     public static void writeData() {
-        StagingData d = new StagingData((TreeMap<String, String>) added, removed);
-        Utils.writeObject(Repository.INDEX_FILE, d);
+        StagingData data = new StagingData((TreeMap<String, String>) added, removed);
+        Utils.writeObject(Repository.INDEX_FILE, data);
     }
 
     //从index中读取Map
