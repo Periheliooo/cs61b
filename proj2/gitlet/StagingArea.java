@@ -111,10 +111,9 @@ public class StagingArea {
         }
     }
 
-    public static boolean checkAllTracked(String branchName) {
+    public static boolean checkAllTracked(String commitId) {
         boolean flag = true;
         Map<String, String> snapshots = Repository.getSnapshots();
-        String commitId = readObject(join(Repository.HEADS_DIR, branchName), String.class);
         Commit c = readObject(join(Repository.COMMITS_DIR, commitId), Commit.class);
         for (String s : Objects.requireNonNull(plainFilenamesIn(Repository.CWD))) {
             if (!snapshots.containsKey(s) && c.snapshots().containsKey(s)) {

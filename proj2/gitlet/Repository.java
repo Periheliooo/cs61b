@@ -323,7 +323,7 @@ public class Repository {
             System.exit(0);
         } else if (f.equals(readObject(HEAD_FILE, File.class))) {
             System.out.println("No need to checkout the current branch.");
-        } else if (!StagingArea.checkAllTracked(branchName)) {
+        } else if (!StagingArea.checkAllTracked(readObject(f, String.class))) {
             System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
             System.exit(0);
         } else {
@@ -364,7 +364,7 @@ public class Repository {
     public static void branch(String branchName) {
         File newBranch = join(HEADS_DIR, branchName);
         if (newBranch.exists()) {
-            System.out.println("A branch with that name already exist.");
+            System.out.println("A branch with that name already exists.");
             System.exit(0);
         }
         File curBranch = readObject(HEAD_FILE, File.class);
@@ -392,6 +392,9 @@ public class Repository {
         File f = join(COMMITS_DIR, commitId);
         if (!f.exists()) {
             System.out.println("No commit with that id exists.");
+            System.exit(0);
+        } else if (!StagingArea.checkAllTracked(readObject(f, String.class))) {
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
             System.exit(0);
         } else {
             Commit c = readObject(f, Commit.class);
