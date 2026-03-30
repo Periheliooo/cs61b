@@ -113,12 +113,9 @@ public class StagingArea {
 
     public static boolean checkAllTracked(String branchName) {
         boolean flag = true;
-        Commit parentCommit = readObject(join(Repository.HEADS_DIR, branchName), Commit.class);
-        Map<String, String> snapshots = parentCommit.snapshots();
-        Map<String, String> curSnapshots = added;
-        snapshots.putAll(curSnapshots);
-        for (String s : snapshots.keySet()) {
-            if (plainFilenamesIn(Repository.CWD).contains(s) && !added.containsKey(s)) {
+        Map<String, String> snapshots = Repository.getSnapshots();
+        for (String s : Objects.requireNonNull(plainFilenamesIn(Repository.CWD))) {
+            if (!snapshots.containsKey(s)) {
                 flag = false;
                 break;
             }

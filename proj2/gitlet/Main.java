@@ -110,6 +110,22 @@ public class Main {
                     System.out.println("Incorrect operands");
                     System.exit(0);
                 }
+            case "branch":
+                Repository.checkInitialized();
+                if(args.length == 2) {
+                    Repository.branch(args[1]);
+                } else {
+                    System.out.println("Incorrect operands");
+                    System.exit(0);
+                }
+            case "rm-branch":
+                Repository.checkInitialized();
+                if(args.length == 2) {
+                    Repository.rmBranch(args[1]);
+                } else {
+                    System.out.println("Incorrect operands");
+                    System.exit(0);
+                }
             default:
                 System.out.println("No command with that name exists.");
                 System.exit(0);

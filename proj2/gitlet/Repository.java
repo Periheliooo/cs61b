@@ -337,7 +337,6 @@ public class Repository {
         } else {
             Commit c = readObject(f, Commit.class);
             Map<String, String> snapshots = c.snapshots();
-            List<String> curFiles = plainFilenamesIn(CWD);
             for (String s : snapshots.keySet()) {
                 byte[] content = readContents(join(BLOBS_DIR, snapshots.get(s)));
                 writeContents(join(CWD, s), content);
@@ -349,6 +348,30 @@ public class Repository {
             }
             StagingArea.clear();
             writeObject(HEAD_FILE, join(HEADS_DIR, branchName));
+        }
+    }
+
+    public static void branch(String branchName) {
+        File newBranch = join(REF_DIR, branchName);
+        if (newBranch.exists()) {
+            System.out.println("A branch with that name already exist.");
+            System.exit(0);
+        }
+        writeObject(newBranch, sha1((Object) serialize(getCurCommit())));
+    }
+
+    public static void rmBranch(String branchName) {
+        File branch = join(REF_DIR, branchName);
+        if (branch.exists()) {
+            if (readObject(HEAD_FILE, File.class).getName().equals(branch)) {
+                System.out.println("Cannot remove the current branch.");
+                System.exit(0);
+            } else {
+                join(HEADS_DIR, branchName).delete();
+            }
+        } else {
+            System.out.println("A branch with that name does not exist.");
+            System.exit(0);
         }
     }
 }
