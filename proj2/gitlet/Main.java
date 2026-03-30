@@ -133,6 +133,15 @@ public class Main {
                     System.exit(0);
                 }
                 break;
+            case "merge":
+                Repository.checkInitialized();
+                if (args.length == 2) {
+                    Repository.merge(args[1]);
+                } else {
+                    System.out.println("Incorrect operands");
+                    System.exit(0);
+                }
+                break;
             default:
                 System.out.println("No command with that name exists.");
                 System.exit(0);

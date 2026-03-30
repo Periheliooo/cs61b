@@ -79,7 +79,6 @@ public class Repository {
         c.saveCommit();
 
         File curBranch = Utils.readObject(HEAD_FILE, File.class);
-        // Utils.writeObject(HEAD_FILE, MASTER_FILE);    这边似乎不用修改，可能是branch操作修改
         Utils.writeObject(curBranch, sha1(Utils.serialize(c)));
         StagingArea.clear();
 
@@ -394,4 +393,24 @@ public class Repository {
             writeObject(curBranch, commitId);
         }
     }
+
+    public static void merge(String branchName) {
+        File f = join(HEADS_DIR, branchName);
+        String commitId = readObject(f, String.class);
+        Commit targetCommit = readObject(join(COMMITS_DIR, commitId), Commit.class);
+        Commit curCommit = getCurCommit();
+        Commit splitCommit = getSplitCommit(targetCommit, curCommit);
+
+    }
+
+    public static Commit getSplitCommit(Commit targetCommit, Commit curCommit) {
+        Commit a = targetCommit;
+        Commit b = curCommit;
+        while (!a.equals(b)) {
+            if (compareDates(a.date(), b.date()) > 0) {
+
+            }
+        }
+    }
+
 }
