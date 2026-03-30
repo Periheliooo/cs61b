@@ -297,15 +297,7 @@ public class Repository {
     }
 
     public static void checkoutFile(String commitId, String fileName) {
-        if (commitId.length() < 40) {
-            List<String> allCommits = plainFilenamesIn(COMMITS_DIR);
-            for (String id : allCommits) {
-                if (id.startsWith(commitId)) {
-                    commitId = id;
-                    break;
-                }
-            }
-        }
+        commitId = expandShortId(commitId);
         File f = join(COMMITS_DIR, commitId);
         if (!f.exists()) {
             System.out.println("No commit with that id exists.");
@@ -337,19 +329,36 @@ public class Repository {
         } else {
             String commitId = readObject(f, String.class);
             Commit c = readObject(join(COMMITS_DIR, commitId), Commit.class);
-            Map<String, String> snapshots = c.snapshots();
-            for (String s : snapshots.keySet()) {
-                byte[] content = readContents(join(BLOBS_DIR, snapshots.get(s)));
-                writeContents(join(CWD, s), content);
-            }
-            for (String s : getSnapshots().keySet()) {
-                if (!snapshots.keySet().contains(s)) {
-                    join(CWD, s).delete();
-                }
-            }
-            StagingArea.clear();
+            checkoutCommit(c);
             writeObject(HEAD_FILE, join(HEADS_DIR, branchName));
         }
+    }
+
+    public static void checkoutCommit(Commit c) {
+        Map<String, String> snapshots = c.snapshots();
+        for (String s : snapshots.keySet()) {
+            byte[] content = readContents(join(BLOBS_DIR, snapshots.get(s)));
+            writeContents(join(CWD, s), content);
+        }
+        for (String s : getSnapshots().keySet()) {
+            if (!snapshots.keySet().contains(s)) {
+                join(CWD, s).delete();
+            }
+        }
+        StagingArea.clear();
+    }
+
+    public static String expandShortId(String commitId) {
+        if (commitId.length() < 40) {
+            List<String> allCommits = plainFilenamesIn(COMMITS_DIR);
+            for (String id : allCommits) {
+                if (id.startsWith(commitId)) {
+                    commitId = id;
+                    break;
+                }
+            }
+        }
+        return commitId;
     }
 
     public static void branch(String branchName) {
@@ -375,6 +384,20 @@ public class Repository {
         } else {
             System.out.println("A branch with that name does not exists.");
             System.exit(0);
+        }
+    }
+
+    public static void reset(String commitId) {
+        commitId = expandShortId(commitId);
+        File f = join(COMMITS_DIR, commitId);
+        if (!f.exists()) {
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        } else {
+            Commit c = readObject(f, Commit.class);
+            checkoutCommit(c);
+            File curBranch = readObject(HEAD_FILE, File.class);
+            writeObject(curBranch, commitId);
         }
     }
 }
