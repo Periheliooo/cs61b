@@ -40,7 +40,7 @@ public class Main {
             // TODO: FILL THE REST IN
             case "commit":
                 Repository.checkInitialized();
-                if (StagingArea.added().isEmpty()) {
+                if (StagingArea.added().isEmpty() && StagingArea.removed().isEmpty()) {
                     System.out.println("No changes added to the commit.");
                     System.exit(0);
                 } else if (args.length == 1) {

@@ -10,7 +10,7 @@ import java.util.TreeMap;
 import static gitlet.Utils.*;
 
 public class StagingArea {
-    private static StagingData d = readData();
+    private static final StagingData d = readData();
     private static Map<String, String> added = d.saveAdded;
     private static LinkedList<String> removed = d.saveRemoved;
 
@@ -24,6 +24,7 @@ public class StagingArea {
             System.exit(0);
         }
 
+        if (removed.contains(fileName)) removed.remove(fileName);
         byte[] contents = Utils.readContents(file);
         String newFileName = Utils.sha1(contents);
         String oldFileName = getOldFileName(fileName);

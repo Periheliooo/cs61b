@@ -23,6 +23,7 @@ public class Commit implements Serializable {
      */
 
     /** The message of this Commit. */
+    private static final long serialVersionUID = 1L;
     private String message;
     private String date;   // TODO: 时间
     private String parent;   // TODO:
@@ -37,7 +38,7 @@ public class Commit implements Serializable {
 
     //TODO
     public static Commit fromFile(String filename) {
-        File file = Utils.join(Repository.OBJECT_DIR, filename);
+        File file = Utils.join(Repository.COMMITS_DIR, filename);
         Commit c = Utils.readObject(file, Commit.class);
         return c;
     }
@@ -67,7 +68,7 @@ public class Commit implements Serializable {
         if (parent == null) {
             return null;
         }
-        File parentFile = Utils.join(Repository.OBJECT_DIR, parent);
+        File parentFile = Utils.join(Repository.COMMITS_DIR, parent);
         return Utils.readObject(parentFile, Commit.class);
     }
 }
