@@ -382,7 +382,7 @@ public class Repository {
                 join(HEADS_DIR, branchName).delete();
             }
         } else {
-            System.out.println("A branch with that name does not exists.");
+            System.out.println("A branch with that name does not exist.");
             System.exit(0);
         }
     }
@@ -393,7 +393,7 @@ public class Repository {
         if (!f.exists()) {
             System.out.println("No commit with that id exists.");
             System.exit(0);
-        } else if (!StagingArea.checkAllTracked(readObject(f, String.class))) {
+        } else if (!StagingArea.checkAllTracked(commitId)) {
             System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
             System.exit(0);
         } else {
