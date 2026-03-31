@@ -419,12 +419,16 @@ public class Repository {
             System.exit(0);
         }
 
-        if (splitCommit.equals(targetCommit)) {
+        String splitCommitHash = sha1(serialize(splitCommit));
+        String targetCommitHash = sha1(serialize(targetCommit));
+        String curCommitHash = sha1(serialize(curCommit));
+
+        if (splitCommitHash.equals(targetCommitHash)) {
             System.out.println("Given branch is an ancestor of the current branch.");
             System.exit(0);
         }
 
-        if (splitCommit.equals(curCommit)) {
+        if (splitCommitHash.equals(curCommitHash)) {
             checkoutBranch(branchName);
             System.out.println("Current branch fast-forwarded.");
             System.exit(0);
@@ -514,11 +518,11 @@ public class Repository {
         Commit a = targetCommit;
         Commit b = curCommit;
         HashSet<String> curAncestors = new HashSet<>();
-        while (a == null) {
+        while (a != null) {
             curAncestors.add(sha1(serialize(a)));
             a = a.getParent();
         }
-        while (b == null) {
+        while (b != null) {
             if (curAncestors.contains(sha1(serialize(b)))) {
                 break;
             }
