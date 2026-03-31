@@ -391,6 +391,7 @@ public class Repository {
     }
 
     public static void merge(String branchName) {
+        boolean flag = true;    // 无冲突为true
         File f = join(HEADS_DIR, branchName);
         if (!f.exists()) {
             System.out.println("A branch with that name does not exist.");
@@ -404,6 +405,8 @@ public class Repository {
             System.out.println("Cannot merge a branch with itself.");
             System.exit(0);
         }
+        StagingArea.checkAllTracked(commitId);    //
+        
         Map<String, String> curSnapshots = curCommit.snapshots();
         Map<String, String> targetSnapshots = targetCommit.snapshots();
         Map<String, String> splitSnapshots = splitCommit.snapshots();
@@ -430,6 +433,7 @@ public class Repository {
                         // 无
                     } else {
                         dealConflict(s, targetSnapshots, curSnapshots);
+                        flag = false;
                     }
                 }
             } else {
@@ -439,12 +443,14 @@ public class Repository {
                         // 无
                     } else {
                         dealConflict(s, targetSnapshots, curSnapshots);
+                        flag = false;
                     }
                 } else if (curHash != null && givenHash == null) {
                     if (curHash.equals(splitHash)) {
-                        // 无
+                        rm(s);
                     } else {
                         dealConflict(s, targetSnapshots, curSnapshots);
+                        flag = false;
                     }
                 } else if (curHash == null && givenHash == null) {
                     // 无
@@ -465,10 +471,17 @@ public class Repository {
                             // 无
                         } else {
                             dealConflict(s, targetSnapshots, curSnapshots);
+                            flag = false;
                         }
                     }
                 }
             }
+        }
+
+        if (flag) {
+            System.out.println("Merged" + branchName + "into" + Utils.readObject(HEAD_FILE, File.class).getName() + ".");
+        } else {
+            System.out.println("Encountered a merge conflict.");
         }
     }
 
@@ -476,7 +489,7 @@ public class Repository {
         Commit a = targetCommit;
         Commit b = curCommit;
         HashSet<String> curAncestors = new HashSet<>();
-        while (!a.equals(null)) {
+        while (a == null) {
             curAncestors.add(sha1(serialize(a)));
             a = a.getParent();
         }
@@ -493,8 +506,24 @@ public class Repository {
         File file = join(CWD, fileName);
         String curHash = curSnapshots.get(fileName);
         String givenHash = targetSnapshots.get(fileName);
-        File curBlob = join(BLOBS_DIR, curHash);
-        File givenBlob = join(BLOBS_DIR, givenHash);
-        
+
+        String curContent = "";
+        if (curHash != null) {
+            curContent = readContentsAsString(join(BLOBS_DIR, curHash));
+        }
+
+        String givenContent = "";
+        if (givenHash != null) {
+            givenContent = readContentsAsString(join(BLOBS_DIR, givenHash));
+        }
+
+        String conflictContent = "<<<<<<< HEAD\n" +
+                curContent +
+                "=======\n" +
+                givenContent +
+                ">>>>>>>\n";
+
+        writeContents(file, conflictContent);
+        add(fileName);
     }
 }
