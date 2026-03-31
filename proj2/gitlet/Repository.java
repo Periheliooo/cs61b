@@ -391,6 +391,11 @@ public class Repository {
     }
 
     public static void merge(String branchName) {
+        if (!StagingArea.added().isEmpty() || !StagingArea.removed().isEmpty()) {
+            System.out.println("You have uncommitted changes.");
+            System.exit(0);
+        }
+
         boolean flag = true;    // 无冲突为true
         File f = join(HEADS_DIR, branchName);
         if (!f.exists()) {
@@ -405,8 +410,11 @@ public class Repository {
             System.out.println("Cannot merge a branch with itself.");
             System.exit(0);
         }
-        StagingArea.checkAllTracked(commitId);    //
-        
+        if (!StagingArea.checkAllTracked(commitId)) {
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
+        }
+
         Map<String, String> curSnapshots = curCommit.snapshots();
         Map<String, String> targetSnapshots = targetCommit.snapshots();
         Map<String, String> splitSnapshots = splitCommit.snapshots();
@@ -478,9 +486,11 @@ public class Repository {
             }
         }
 
-        if (flag) {
-            System.out.println("Merged" + branchName + "into" + Utils.readObject(HEAD_FILE, File.class).getName() + ".");
-        } else {
+        String curBranchName = Utils.readObject(HEAD_FILE, File.class).getName();
+        String msg = "Merged " + branchName + " into " + curBranchName + ".";
+        makeCommit(msg);
+        
+        if (!flag) {
             System.out.println("Encountered a merge conflict.");
         }
     }
@@ -493,7 +503,7 @@ public class Repository {
             curAncestors.add(sha1(serialize(a)));
             a = a.getParent();
         }
-        while (!b.equals(null)) {
+        while (b == null) {
             if (curAncestors.contains(sha1(serialize(b)))) {
                 break;
             }
