@@ -402,16 +402,31 @@ public class Repository {
             System.out.println("A branch with that name does not exist.");
             System.exit(0);
         }
+
+        File curBranchFile = readObject(HEAD_FILE, File.class);
+        if (branchName.equals(curBranchFile.getName())) {
+            System.out.println("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+
         String commitId = readObject(f, String.class);
         Commit targetCommit = readObject(join(COMMITS_DIR, commitId), Commit.class);
         Commit curCommit = getCurCommit();
         Commit splitCommit = getSplitCommit(targetCommit, curCommit);
-        if (splitCommit.equals(curCommit)) {
-            System.out.println("Cannot merge a branch with itself.");
-            System.exit(0);
-        }
+
         if (!StagingArea.checkAllTracked(commitId)) {
             System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
+        }
+
+        if (splitCommit.equals(targetCommit)) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+            System.exit(0);
+        }
+
+        if (splitCommit.equals(curCommit)) {
+            checkoutBranch(branchName);
+            System.out.println("Current branch fast-forwarded.");
             System.exit(0);
         }
 
@@ -489,7 +504,7 @@ public class Repository {
         String curBranchName = Utils.readObject(HEAD_FILE, File.class).getName();
         String msg = "Merged " + branchName + " into " + curBranchName + ".";
         makeCommit(msg);
-        
+
         if (!flag) {
             System.out.println("Encountered a merge conflict.");
         }
