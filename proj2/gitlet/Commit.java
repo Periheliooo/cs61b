@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -19,11 +20,11 @@ public class Commit implements Serializable {
     /** The message of this Commit. */
     private static final long serialVersionUID = 1L;
     private String message;
-    private String date;
+    private Date date;
     private String parent;
     private Map<String, String> snapshots = new TreeMap<>();
 
-    public Commit(String message, String date, String parent, Map<String, String> snapshots) {
+    public Commit(String message, Date date, String parent, Map<String, String> snapshots) {
         this.message = message;
         this.date = date;
         this.parent = parent;
@@ -48,7 +49,7 @@ public class Commit implements Serializable {
         return this.snapshots;
     }
 
-    public String date() {
+    public Date date() {
         return date;
     }
 

@@ -68,26 +68,22 @@ public class Repository {
      * 创建一个commit对象并保存
      */
     public static void makeCommit(String m) {
-
-        String message = m;
-        Date epoch = new Date();
-        String date = getDate(epoch);
+        Date date = new Date();
         String parent = getParentCommitHash();
         Map<String, String> snapshots = getSnapshots();
 
-        Commit c = new Commit(message, date, parent, snapshots);
+        Commit c = new Commit(m, date, parent, snapshots);
         c.saveCommit();
 
         File curBranch = Utils.readObject(HEAD_FILE, File.class);
         Utils.writeObject(curBranch, sha1(Utils.serialize(c)));
         StagingArea.clear();
-
     }
 
     //初始commit
     public static void makeInitialCommit() {
         String message = "initial commit";
-        String date = getDate(new Date(0));
+        Date date = new Date(0);
         Map<String, String> snapshots = new TreeMap<>();
 
         Commit c = new Commit(message, date, null, snapshots);
@@ -101,7 +97,7 @@ public class Repository {
     /**
      * 创建commit对象时获取参数
      */
-    public static String getDate(Date date) {
+    public static String visualizeDate(Date date) {
         // EEE: 星期几缩写, MMM: 月份缩写, d: 日期, HH:mm:ss: 24小时制时间, yyyy: 年份, Z: 时区
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
         sdf.setTimeZone(TimeZone.getTimeZone("GMT-0800"));   // 强制 UTC-8
@@ -162,7 +158,7 @@ public class Repository {
     public static void printLog(Commit c) {
         System.out.println("===");
         System.out.println("commit " + sha1(serialize(c)));
-        System.out.println("Date: " + c.date());
+        System.out.println("Date: " + visualizeDate(c.date()));
         System.out.println(c.message());
         System.out.println();
     }
@@ -396,21 +392,109 @@ public class Repository {
 
     public static void merge(String branchName) {
         File f = join(HEADS_DIR, branchName);
+        if (!f.exists()) {
+            System.out.println("A branch with that name does not exist.");
+            System.exit(0);
+        }
         String commitId = readObject(f, String.class);
         Commit targetCommit = readObject(join(COMMITS_DIR, commitId), Commit.class);
         Commit curCommit = getCurCommit();
         Commit splitCommit = getSplitCommit(targetCommit, curCommit);
+        if (splitCommit.equals(curCommit)) {
+            System.out.println("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+        Map<String, String> curSnapshots = curCommit.snapshots();
+        Map<String, String> targetSnapshots = targetCommit.snapshots();
+        Map<String, String> splitSnapshots = splitCommit.snapshots();
+        Set<String> allFiles = new HashSet<>();
+        allFiles.addAll(splitSnapshots.keySet());
+        allFiles.addAll(curSnapshots.keySet());
+        allFiles.addAll(targetSnapshots.keySet());
 
+        for (String s : allFiles) {
+            String splitHash = splitSnapshots.get(s);
+            String curHash = curSnapshots.get(s);
+            String givenHash = targetSnapshots.get(s);
+
+            // 第一层大分叉：Split 里有没有？
+            if (splitHash == null) {
+                // Split 无
+                if (curHash == null && givenHash != null) {
+                    checkoutFile(commitId, s);
+                    add(s);
+                } else if (curHash != null && givenHash == null) {
+                    // 无
+                } else if (curHash != null && givenHash != null) {
+                    if (curHash.equals(givenHash)) {
+                        // 无
+                    } else {
+                        dealConflict(s, targetSnapshots, curSnapshots);
+                    }
+                }
+            } else {
+                // Split 有
+                if (curHash == null && givenHash != null) {
+                    if (givenHash.equals(splitHash)) {
+                        // 无
+                    } else {
+                        dealConflict(s, targetSnapshots, curSnapshots);
+                    }
+                } else if (curHash != null && givenHash == null) {
+                    if (curHash.equals(splitHash)) {
+                        // 无
+                    } else {
+                        dealConflict(s, targetSnapshots, curSnapshots);
+                    }
+                } else if (curHash == null && givenHash == null) {
+                    // 无
+                } else {
+                    // 有有：根据改/未改进行判断
+                    boolean curModified = !curHash.equals(splitHash);
+                    boolean givenModified = !givenHash.equals(splitHash);
+
+                    if (!curModified && !givenModified) {
+                        // 无
+                    } else if (!curModified && givenModified) {
+                        checkoutFile(commitId, s);
+                        add(s);
+                    } else if (curModified && !givenModified) {
+                        // 无
+                    } else { // 有改, 有改
+                        if (curHash.equals(givenHash)) {
+                            // 无
+                        } else {
+                            dealConflict(s, targetSnapshots, curSnapshots);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public static Commit getSplitCommit(Commit targetCommit, Commit curCommit) {
         Commit a = targetCommit;
         Commit b = curCommit;
-        while (!a.equals(b)) {
-            if (compareDates(a.date(), b.date()) > 0) {
-
-            }
+        HashSet<String> curAncestors = new HashSet<>();
+        while (!a.equals(null)) {
+            curAncestors.add(sha1(serialize(a)));
+            a = a.getParent();
         }
+        while (!b.equals(null)) {
+            if (curAncestors.contains(sha1(serialize(b)))) {
+                break;
+            }
+            b = b.getParent();
+        }
+        return b;
     }
 
+    public static void dealConflict(String fileName, Map<String, String> targetSnapshots, Map<String, String> curSnapshots) {
+        File file = join(CWD, fileName);
+        String curHash = curSnapshots.get(fileName);
+        String givenHash = targetSnapshots.get(fileName);
+        File curBlob = join(BLOBS_DIR, curHash);
+        File givenBlob = join(BLOBS_DIR, givenHash);
+        
+    }
 }
